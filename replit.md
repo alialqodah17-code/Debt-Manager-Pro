@@ -27,11 +27,17 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 ## Artifacts
 
 - **api-server** — Express + Drizzle backend at `/api`. Routes: `profile`, `debts`, `summary`, `payments`. Uses Replit-managed Clerk (`clerkMiddleware` + proxy at `/api/__clerk`). All routes behind `requireAuth`.
-- **debts** (Diyoun) — Expo app at `/`. Bilingual EN/AR debt tracker with luxurious emerald + gold theme. Auth via Replit-managed Clerk (Google SSO + email/password using `@clerk/expo` for `useSSO`/`useAuth` and `@clerk/expo/legacy` for `useSignIn`/`useSignUp`). Settings (currency, language, theme) persisted via AsyncStorage; profile synced to backend. Permanent delete for debts and payments.
+- **debts** (Diyoun) — Expo app at `/`. Bilingual EN/AR debt tracker with luxurious emerald + gold theme (Playfair Display serif for hero numbers, Inter for UI, deep-midnight gradient cards with gold accents). Auth via Replit-managed Clerk (Google SSO + email/password using `@clerk/expo` for `useSSO`/`useAuth` and `@clerk/expo/legacy` for `useSignIn`/`useSignUp`). Settings (currency, language, theme) persisted via AsyncStorage; profile + debts + payments synced to PostgreSQL via `/api`. Permanent delete for debts and payments. Each debt and payment carries a date.
 - **mockup-sandbox** — Vite preview server for canvas component prototyping.
 
 ## Notes
 
-- APK export is not supported by Replit's Expo Launch (iOS only). User can build APK locally with `eas build --platform android` if they configure EAS.
+- Replit's Expo Launch is iOS-only; for an Android APK use EAS cloud build:
+  1. Sign up free at https://expo.dev and run `npx eas-cli login` (one-time).
+  2. From the project root: `pnpm --filter @workspace/debts run build:apk`
+     (this runs `eas build -p android --profile preview` defined in `artifacts/debts/eas.json`).
+  3. EAS builds in the cloud and returns a downloadable APK URL.
+  - Production AAB (Play Store): `pnpm --filter @workspace/debts run build:android`.
+  - Android package name is `com.diyoun.app` (set in `app.json`).
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.

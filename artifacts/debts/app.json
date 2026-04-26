@@ -14,9 +14,17 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.diyoun.app"
     },
-    "android": {},
+    "android": {
+      "package": "com.diyoun.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#070C18"
+      },
+      "edgeToEdgeEnabled": true
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },

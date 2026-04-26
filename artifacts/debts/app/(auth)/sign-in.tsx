@@ -2,6 +2,7 @@ import { useSSO } from "@clerk/expo";
 import { useSignIn } from "@clerk/expo/legacy";
 import { Feather } from "@expo/vector-icons";
 import * as AuthSession from "expo-auth-session";
+import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useCallback, useEffect, useState } from "react";
@@ -106,6 +107,11 @@ export default function SignInScreen() {
 
   return (
     <Screen noTopInset noBottomInset>
+      <LinearGradient
+        colors={[c.gradientHeroFrom, c.background]}
+        locations={[0, 0.55]}
+        style={StyleSheet.absoluteFill}
+      />
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
@@ -127,45 +133,59 @@ export default function SignInScreen() {
             style={({ pressed }) => [
               styles.langBtn,
               {
-                borderColor: c.border,
-                backgroundColor: c.card,
+                borderColor: c.accent + "55",
+                backgroundColor: "rgba(255,255,255,0.08)",
                 opacity: pressed ? 0.7 : 1,
                 borderRadius: c.radius - 6,
               },
             ]}
           >
-            <Feather name="globe" size={14} color={c.foreground} />
-            <Text style={[styles.langLabel, { color: c.foreground }]}>
+            <Feather name="globe" size={14} color={c.accent} />
+            <Text style={[styles.langLabel, { color: "#F4EFE3" }]}>
               {language === "en" ? "العربية" : "English"}
             </Text>
           </Pressable>
         </View>
 
         <View style={[styles.brand, { alignItems: isRTL ? "flex-end" : "flex-start" }]}>
-          <View
-            style={[
-              styles.logo,
-              { backgroundColor: c.primary, borderRadius: c.radius },
-            ]}
+          <LinearGradient
+            colors={[c.gradientGoldFrom, c.gradientGoldTo]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.logo, { borderRadius: c.radius }]}
           >
-            <Feather name="repeat" size={28} color={c.primaryForeground} />
-          </View>
+            <Feather name="repeat" size={30} color={c.gradientHeroFrom} />
+          </LinearGradient>
           <Text
             style={[
               styles.brandTitle,
-              { color: c.foreground, textAlign: isRTL ? "right" : "left" },
+              {
+                color: "#F4EFE3",
+                textAlign: isRTL ? "right" : "left",
+              },
             ]}
           >
             {t("appName")}
           </Text>
-          <Text
+          <View
             style={[
-              styles.brandSubtitle,
-              { color: c.mutedForeground, textAlign: isRTL ? "right" : "left" },
+              styles.taglineRow,
+              { flexDirection: isRTL ? "row-reverse" : "row" },
             ]}
           >
-            {t("welcome")}
-          </Text>
+            <View style={[styles.goldDot, { backgroundColor: c.accent }]} />
+            <Text
+              style={[
+                styles.brandSubtitle,
+                {
+                  color: c.accent,
+                  textAlign: isRTL ? "right" : "left",
+                },
+              ]}
+            >
+              {t("tagline")}
+            </Text>
+          </View>
         </View>
 
         <View style={styles.form}>
@@ -271,23 +291,41 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
   },
   brand: {
-    gap: 8,
+    gap: 10,
   },
   logo: {
-    width: 64,
-    height: 64,
+    width: 68,
+    height: 68,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
+    shadowColor: "#D4AF37",
+    shadowOpacity: 0.4,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
   },
   brandTitle: {
-    fontSize: 32,
-    fontFamily: "Inter_700Bold",
-    letterSpacing: -0.5,
+    fontSize: 44,
+    fontFamily: "PlayfairDisplay_700Bold",
+    letterSpacing: -1,
+    lineHeight: 50,
+  },
+  taglineRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  goldDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 999,
   },
   brandSubtitle: {
-    fontSize: 16,
-    fontFamily: "Inter_500Medium",
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
   },
   form: {
     gap: 16,

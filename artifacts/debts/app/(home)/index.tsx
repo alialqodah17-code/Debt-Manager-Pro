@@ -1,5 +1,6 @@
 import { useUser } from "@clerk/expo";
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -107,66 +108,93 @@ export default function Dashboard() {
 
         <View
           style={[
-            styles.netCard,
-            {
-              backgroundColor: c.foreground,
-              borderRadius: c.radius,
-            },
+            styles.netShadow,
+            { borderRadius: c.radius, shadowColor: c.accent },
           ]}
         >
-          <Text
-            style={[
-              styles.netLabel,
-              {
-                color: c.background,
-                opacity: 0.7,
-                textAlign: isRTL ? "right" : "left",
-              },
-            ]}
+          <LinearGradient
+            colors={[c.gradientHeroFrom, c.gradientHeroTo]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.netCard, { borderRadius: c.radius }]}
           >
-            {t("netBalance")}
-          </Text>
-          <Text
-            style={[
-              styles.netValue,
-              {
-                color:
-                  net > 0
-                    ? c.accent
-                    : net < 0
-                      ? c.destructive
-                      : c.background,
-                textAlign: isRTL ? "right" : "left",
-              },
-            ]}
-          >
-            {(net > 0 ? "+" : net < 0 ? "−" : "") +
-              formatCompactAmount(Math.abs(net), displayCurrency, language)}
-          </Text>
-          <View style={[styles.netDivider, { backgroundColor: c.background, opacity: 0.1 }]} />
-          <View
-            style={[
-              styles.netRow,
-              { flexDirection: isRTL ? "row-reverse" : "row" },
-            ]}
-          >
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.netSubLabel, { color: c.background, opacity: 0.6 }]}>
-                {t("openDebts")}
-              </Text>
-              <Text style={[styles.netSubValue, { color: c.background }]}>
-                {data?.openDebtsCount ?? 0}
+            <View
+              style={[
+                styles.netHeader,
+                { flexDirection: isRTL ? "row-reverse" : "row" },
+              ]}
+            >
+              <View
+                style={[styles.netDot, { backgroundColor: c.accent }]}
+              />
+              <Text
+                style={[
+                  styles.netLabel,
+                  { color: c.accent, textAlign: isRTL ? "right" : "left" },
+                ]}
+              >
+                {t("netBalance")}
               </Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.netSubLabel, { color: c.background, opacity: 0.6 }]}>
-                {t("settledDebts")}
-              </Text>
-              <Text style={[styles.netSubValue, { color: c.background }]}>
-                {data?.settledDebtsCount ?? 0}
-              </Text>
+            <Text
+              style={[
+                styles.netValue,
+                {
+                  color:
+                    net > 0
+                      ? c.accentLight
+                      : net < 0
+                        ? "#FCA5A5"
+                        : "#F4EFE3",
+                  textAlign: isRTL ? "right" : "left",
+                },
+              ]}
+            >
+              {(net > 0 ? "+" : net < 0 ? "−" : "") +
+                formatCompactAmount(Math.abs(net), displayCurrency, language)}
+            </Text>
+            <LinearGradient
+              colors={[
+                "rgba(212,175,55,0)",
+                "rgba(212,175,55,0.4)",
+                "rgba(212,175,55,0)",
+              ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.netDivider}
+            />
+            <View
+              style={[
+                styles.netRow,
+                { flexDirection: isRTL ? "row-reverse" : "row" },
+              ]}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.netSubLabel, { color: "#F4EFE3", opacity: 0.55 }]}>
+                  {t("openDebts")}
+                </Text>
+                <Text style={[styles.netSubValue, { color: "#F4EFE3" }]}>
+                  {data?.openDebtsCount ?? 0}
+                </Text>
+              </View>
+              <View
+                style={{
+                  width: 1,
+                  alignSelf: "stretch",
+                  backgroundColor: "rgba(212,175,55,0.2)",
+                  marginHorizontal: 12,
+                }}
+              />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.netSubLabel, { color: "#F4EFE3", opacity: 0.55 }]}>
+                  {t("settledDebts")}
+                </Text>
+                <Text style={[styles.netSubValue, { color: "#F4EFE3" }]}>
+                  {data?.settledDebtsCount ?? 0}
+                </Text>
+              </View>
             </View>
-          </View>
+          </LinearGradient>
         </View>
 
         <View
@@ -315,44 +343,64 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_500Medium",
   },
   title: {
-    fontSize: 30,
-    fontFamily: "Inter_700Bold",
-    letterSpacing: -0.5,
+    fontSize: 34,
+    fontFamily: "PlayfairDisplay_700Bold",
+    letterSpacing: -0.8,
+    lineHeight: 40,
+  },
+  netShadow: {
+    shadowOpacity: 0.35,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 12,
   },
   netCard: {
-    padding: 20,
+    padding: 22,
+    gap: 6,
+    overflow: "hidden",
+  },
+  netHeader: {
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
+  netDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 999,
+  },
   netLabel: {
-    fontSize: 13,
-    fontFamily: "Inter_500Medium",
-    letterSpacing: 0.5,
+    fontSize: 11,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 1,
     textTransform: "uppercase",
   },
   netValue: {
-    fontSize: 36,
-    fontFamily: "Inter_700Bold",
-    letterSpacing: -1,
-    marginTop: 4,
+    fontSize: 44,
+    fontFamily: "PlayfairDisplay_700Bold",
+    letterSpacing: -1.5,
+    marginTop: 6,
+    lineHeight: 52,
   },
   netDivider: {
     height: 1,
-    marginVertical: 12,
+    marginVertical: 14,
   },
   netRow: {
     flexDirection: "row",
     gap: 16,
   },
   netSubLabel: {
-    fontSize: 11,
-    fontFamily: "Inter_500Medium",
+    fontSize: 10,
+    fontFamily: "Inter_600SemiBold",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   netSubValue: {
-    fontSize: 18,
-    fontFamily: "Inter_700Bold",
-    marginTop: 2,
+    fontSize: 22,
+    fontFamily: "PlayfairDisplay_700Bold",
+    marginTop: 4,
+    letterSpacing: -0.5,
   },
   statsRow: {
     flexDirection: "row",
@@ -375,9 +423,9 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_500Medium",
   },
   statValue: {
-    fontSize: 17,
-    fontFamily: "Inter_700Bold",
-    letterSpacing: -0.3,
+    fontSize: 20,
+    fontFamily: "PlayfairDisplay_700Bold",
+    letterSpacing: -0.5,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -386,8 +434,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontFamily: "Inter_700Bold",
+    fontSize: 22,
+    fontFamily: "PlayfairDisplay_700Bold",
+    letterSpacing: -0.5,
   },
   sectionLink: {
     fontSize: 14,

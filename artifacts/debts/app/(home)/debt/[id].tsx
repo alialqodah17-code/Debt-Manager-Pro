@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -175,69 +176,92 @@ export default function DebtDetail() {
       >
         <View
           style={[
-            styles.heroCard,
-            {
-              backgroundColor: c.card,
-              borderColor: c.border,
-              borderRadius: c.radius,
-              alignItems: isRTL ? "flex-end" : "flex-start",
-            },
+            styles.heroShadow,
+            { borderRadius: c.radius, shadowColor: c.accent },
           ]}
         >
-          <View
+          <LinearGradient
+            colors={[c.gradientHeroFrom, c.gradientHeroTo]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
             style={[
-              styles.directionBadge,
-              { backgroundColor: accentColor + "1A" },
+              styles.heroCard,
+              {
+                borderRadius: c.radius,
+                alignItems: isRTL ? "flex-end" : "flex-start",
+              },
             ]}
           >
-            <Feather
-              name={isOwedToMe ? "arrow-down-left" : "arrow-up-right"}
-              size={12}
-              color={accentColor}
-            />
-            <Text style={[styles.directionText, { color: accentColor }]}>
-              {isOwedToMe ? t("owedToMe") : t("iOwe")}
-            </Text>
-          </View>
-          <Text
-            style={[
-              styles.personName,
-              { color: c.foreground, textAlign: isRTL ? "right" : "left" },
-            ]}
-          >
-            {data.personName}
-          </Text>
-          <Text
-            style={[
-              styles.bigAmount,
-              { color: accentColor, textAlign: isRTL ? "right" : "left" },
-            ]}
-          >
-            {formatAmount(data.remainingAmount, data.currency, language)}
-          </Text>
-          <Text
-            style={[styles.subAmount, { color: c.mutedForeground }]}
-          >
-            {t("paid")} {formatAmount(data.paidAmount, data.currency, language)}{" "}
-            {t("of")} {formatAmount(data.amount, data.currency, language)}
-          </Text>
-
-          {data.status === "settled" ? (
             <View
               style={[
-                styles.settledBadge,
+                styles.directionBadge,
                 {
-                  backgroundColor: c.success + "1A",
-                  borderColor: c.success + "40",
+                  backgroundColor: accentColor + "26",
+                  borderWidth: 1,
+                  borderColor: accentColor + "55",
                 },
               ]}
             >
-              <Feather name="check-circle" size={14} color={c.success} />
-              <Text style={[styles.settledText, { color: c.success }]}>
-                {t("fullySettled")}
+              <Feather
+                name={isOwedToMe ? "arrow-down-left" : "arrow-up-right"}
+                size={12}
+                color={isOwedToMe ? c.accentLight : "#FCA5A5"}
+              />
+              <Text
+                style={[
+                  styles.directionText,
+                  { color: isOwedToMe ? c.accentLight : "#FCA5A5" },
+                ]}
+              >
+                {isOwedToMe ? t("owedToMe") : t("iOwe")}
               </Text>
             </View>
-          ) : null}
+            <Text
+              style={[
+                styles.personName,
+                { color: "#F4EFE3", textAlign: isRTL ? "right" : "left" },
+              ]}
+            >
+              {data.personName}
+            </Text>
+            <Text
+              style={[
+                styles.bigAmount,
+                {
+                  color: isOwedToMe ? c.accentLight : "#FCA5A5",
+                  textAlign: isRTL ? "right" : "left",
+                },
+              ]}
+            >
+              {formatAmount(data.remainingAmount, data.currency, language)}
+            </Text>
+            <Text
+              style={[
+                styles.subAmount,
+                { color: "#F4EFE3", opacity: 0.6 },
+              ]}
+            >
+              {t("paid")} {formatAmount(data.paidAmount, data.currency, language)}{" "}
+              {t("of")} {formatAmount(data.amount, data.currency, language)}
+            </Text>
+
+            {data.status === "settled" ? (
+              <View
+                style={[
+                  styles.settledBadge,
+                  {
+                    backgroundColor: "rgba(16,185,129,0.15)",
+                    borderColor: "rgba(16,185,129,0.4)",
+                  },
+                ]}
+              >
+                <Feather name="check-circle" size={14} color={c.primaryLight} />
+                <Text style={[styles.settledText, { color: c.primaryLight }]}>
+                  {t("fullySettled")}
+                </Text>
+              </View>
+            ) : null}
+          </LinearGradient>
         </View>
 
         {data.note ? (
@@ -532,10 +556,16 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 16,
   },
+  heroShadow: {
+    shadowOpacity: 0.35,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 12,
+  },
   heroCard: {
-    padding: 20,
-    borderWidth: 1,
+    padding: 24,
     gap: 8,
+    overflow: "hidden",
   },
   directionBadge: {
     flexDirection: "row",
@@ -552,15 +582,17 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   personName: {
-    fontSize: 22,
-    fontFamily: "Inter_700Bold",
-    marginTop: 8,
+    fontSize: 24,
+    fontFamily: "PlayfairDisplay_600SemiBold",
+    marginTop: 10,
+    letterSpacing: -0.5,
   },
   bigAmount: {
-    fontSize: 38,
-    fontFamily: "Inter_700Bold",
-    letterSpacing: -1,
-    marginTop: 4,
+    fontSize: 48,
+    fontFamily: "PlayfairDisplay_700Bold",
+    letterSpacing: -1.5,
+    marginTop: 6,
+    lineHeight: 56,
   },
   subAmount: {
     fontSize: 13,

@@ -2,6 +2,7 @@ import { useSSO } from "@clerk/expo";
 import { useSignUp } from "@clerk/expo/legacy";
 import { Feather } from "@expo/vector-icons";
 import * as AuthSession from "expo-auth-session";
+import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useCallback, useEffect, useState } from "react";
@@ -128,6 +129,11 @@ export default function SignUpScreen() {
 
   return (
     <Screen noTopInset noBottomInset>
+      <LinearGradient
+        colors={[c.gradientHeroFrom, c.background]}
+        locations={[0, 0.55]}
+        style={StyleSheet.absoluteFill}
+      />
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
@@ -139,18 +145,18 @@ export default function SignUpScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={[styles.brand, { alignItems: isRTL ? "flex-end" : "flex-start" }]}>
-          <View
-            style={[
-              styles.logo,
-              { backgroundColor: c.primary, borderRadius: c.radius },
-            ]}
+          <LinearGradient
+            colors={[c.gradientGoldFrom, c.gradientGoldTo]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.logo, { borderRadius: c.radius }]}
           >
-            <Feather name="repeat" size={28} color={c.primaryForeground} />
-          </View>
+            <Feather name="repeat" size={30} color={c.gradientHeroFrom} />
+          </LinearGradient>
           <Text
             style={[
               styles.brandTitle,
-              { color: c.foreground, textAlign: isRTL ? "right" : "left" },
+              { color: "#F4EFE3", textAlign: isRTL ? "right" : "left" },
             ]}
           >
             {pendingVerification ? t("verifyEmail") : t("createAccount")}
@@ -158,7 +164,7 @@ export default function SignUpScreen() {
           <Text
             style={[
               styles.brandSubtitle,
-              { color: c.mutedForeground, textAlign: isRTL ? "right" : "left" },
+              { color: c.accent, textAlign: isRTL ? "right" : "left" },
             ]}
           >
             {pendingVerification ? t("weSentCode") : t("tagline")}
@@ -279,22 +285,30 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     gap: 32,
   },
-  brand: { gap: 8 },
+  brand: { gap: 10 },
   logo: {
-    width: 64,
-    height: 64,
+    width: 68,
+    height: 68,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
+    shadowColor: "#D4AF37",
+    shadowOpacity: 0.4,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
   },
   brandTitle: {
-    fontSize: 28,
-    fontFamily: "Inter_700Bold",
-    letterSpacing: -0.5,
+    fontSize: 36,
+    fontFamily: "PlayfairDisplay_700Bold",
+    letterSpacing: -1,
+    lineHeight: 42,
   },
   brandSubtitle: {
-    fontSize: 15,
-    fontFamily: "Inter_500Medium",
+    fontSize: 13,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
   },
   form: { gap: 16 },
   divider: {

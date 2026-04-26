@@ -1,3 +1,4 @@
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
   ActivityIndicator,
@@ -11,7 +12,13 @@ import * as Haptics from "expo-haptics";
 import { Platform } from "react-native";
 import { useColors } from "@/hooks/useColors";
 
-type Variant = "primary" | "secondary" | "outline" | "destructive" | "ghost";
+type Variant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "destructive"
+  | "ghost"
+  | "gold";
 
 interface Props {
   title: string;
@@ -38,9 +45,26 @@ export function Button({
 
   const palette: Record<
     Variant,
-    { bg: string; fg: string; border?: string }
+    {
+      bg: string;
+      fg: string;
+      border?: string;
+      gradient?: readonly [string, string];
+      shadow?: string;
+    }
   > = {
-    primary: { bg: c.primary, fg: c.primaryForeground },
+    primary: {
+      bg: c.primary,
+      fg: c.primaryForeground,
+      gradient: [c.gradientEmeraldFrom, c.gradientEmeraldTo],
+      shadow: c.primary,
+    },
+    gold: {
+      bg: c.accent,
+      fg: c.accentForeground,
+      gradient: [c.gradientGoldFrom, c.gradientGoldTo],
+      shadow: c.accent,
+    },
     secondary: { bg: c.secondary, fg: c.secondaryForeground },
     outline: {
       bg: "transparent",
@@ -60,6 +84,58 @@ export function Button({
     onPress();
   };
 
+  const inner = (
+    <View style={styles.row}>
+      {loading ? (
+        <ActivityIndicator color={p.fg} />
+      ) : (
+        <>
+          {icon}
+          <Text
+            style={[
+              styles.label,
+              { color: p.fg, marginInlineStart: icon ? 8 : 0 },
+            ]}
+            numberOfLines={1}
+          >
+            {title}
+          </Text>
+        </>
+      )}
+    </View>
+  );
+
+  if (p.gradient && !disabled) {
+    return (
+      <Pressable
+        onPress={handlePress}
+        disabled={disabled || loading}
+        style={({ pressed }) => [
+          styles.shadowWrap,
+          {
+            shadowColor: p.shadow ?? "#000",
+            opacity: pressed ? 0.92 : 1,
+            alignSelf: full ? "stretch" : "flex-start",
+            borderRadius: c.radius - 2,
+          },
+          style,
+        ]}
+      >
+        <LinearGradient
+          colors={p.gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[
+            styles.base,
+            { borderRadius: c.radius - 2 },
+          ]}
+        >
+          {inner}
+        </LinearGradient>
+      </Pressable>
+    );
+  }
+
   return (
     <Pressable
       onPress={handlePress}
@@ -77,33 +153,22 @@ export function Button({
         style,
       ]}
     >
-      <View style={styles.row}>
-        {loading ? (
-          <ActivityIndicator color={p.fg} />
-        ) : (
-          <>
-            {icon}
-            <Text
-              style={[
-                styles.label,
-                { color: p.fg, marginInlineStart: icon ? 8 : 0 },
-              ]}
-              numberOfLines={1}
-            >
-              {title}
-            </Text>
-          </>
-        )}
-      </View>
+      {inner}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  shadowWrap: {
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
   base: {
     paddingVertical: 14,
     paddingHorizontal: 18,
-    minHeight: 52,
+    minHeight: 54,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -114,7 +179,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
-    letterSpacing: 0.2,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 0.3,
   },
 });

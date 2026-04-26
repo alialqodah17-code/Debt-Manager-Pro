@@ -36,12 +36,28 @@ export function DebtCard({ debt }: Props) {
         styles.card,
         {
           backgroundColor: c.card,
-          borderColor: c.border,
+          borderColor: isOwedToMe ? c.accent + "55" : c.border,
           borderRadius: c.radius,
           opacity: pressed ? 0.85 : 1,
+          shadowColor: isOwedToMe ? c.accent : "#000",
+          shadowOpacity: isOwedToMe ? 0.12 : 0.08,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 6 },
+          elevation: 4,
         },
       ]}
     >
+      <View
+        style={[
+          styles.accentBar,
+          {
+            backgroundColor: accentColor,
+            [isRTL ? "right" : "left"]: 0,
+            borderTopStartRadius: c.radius,
+            borderBottomStartRadius: c.radius,
+          },
+        ]}
+      />
       <View style={[styles.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
         <View
           style={[
@@ -49,6 +65,8 @@ export function DebtCard({ debt }: Props) {
             {
               backgroundColor: accentColor + "1A",
               borderRadius: c.radius - 4,
+              borderWidth: 1,
+              borderColor: accentColor + "33",
             },
           ]}
         >
@@ -147,6 +165,14 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     gap: 12,
+    overflow: "hidden",
+    position: "relative",
+  },
+  accentBar: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 3,
   },
   row: {
     flexDirection: "row",
@@ -192,9 +218,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   amount: {
-    fontSize: 22,
-    fontFamily: "Inter_700Bold",
-    letterSpacing: -0.5,
+    fontSize: 24,
+    fontFamily: "PlayfairDisplay_700Bold",
+    letterSpacing: -0.7,
   },
   subAmount: {
     fontSize: 13,
