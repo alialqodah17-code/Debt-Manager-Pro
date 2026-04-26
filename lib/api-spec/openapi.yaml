@@ -3,20 +3,27 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Diyoun debt tracking API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: profile
+    description: User profile operations
+  - name: debts
+    description: Debt records
+  - name: payments
+    description: Debt payments / settlements
+  - name: summary
+    description: Aggregate summaries
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +31,198 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /me:
+    get:
+      operationId: getMyProfile
+      tags: [profile]
+      summary: Get my user profile (currency + language preference)
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    put:
+      operationId: updateMyProfile
+      tags: [profile]
+      summary: Update profile (currency / language)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileInput"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  /summary:
+    get:
+      operationId: getSummary
+      tags: [summary]
+      summary: Aggregate totals (owed to me, I owe, recent activity)
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Summary"
+
+  /debts:
+    get:
+      operationId: listDebts
+      tags: [debts]
+      summary: List all debts
+      parameters:
+        - in: query
+          name: direction
+          schema:
+            type: string
+            enum: [owed_to_me, i_owe, all]
+          required: false
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [open, settled, all]
+          required: false
+      responses:
+        "200":
+          description: Debts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Debt"
+    post:
+      operationId: createDebt
+      tags: [debts]
+      summary: Create a new debt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDebtInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Debt"
+
+  /debts/{id}:
+    get:
+      operationId: getDebt
+      tags: [debts]
+      summary: Get a debt with its payments
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Debt with payments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebtWithPayments"
+        "404":
+          description: Not found
+    put:
+      operationId: updateDebt
+      tags: [debts]
+      summary: Update a debt
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDebtInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Debt"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteDebt
+      tags: [debts]
+      summary: Permanently delete a debt and all its payments
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /debts/{id}/payments:
+    post:
+      operationId: addPayment
+      tags: [payments]
+      summary: Record a payment toward a debt
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentInput"
+      responses:
+        "201":
+          description: Created payment + updated debt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebtWithPayments"
+
+  /payments/{id}:
+    delete:
+      operationId: deletePayment
+      tags: [payments]
+      summary: Permanently delete a payment
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +230,171 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    Profile:
+      type: object
+      properties:
+        userId:
+          type: string
+        currency:
+          type: string
+          description: ISO currency code, e.g. USD, SAR, EUR
+        language:
+          type: string
+          enum: [en, ar]
+        createdAt:
+          type: string
+          format: date-time
+      required: [userId, currency, language, createdAt]
+
+    UpdateProfileInput:
+      type: object
+      properties:
+        currency:
+          type: string
+        language:
+          type: string
+          enum: [en, ar]
+
+    Debt:
+      type: object
+      properties:
+        id:
+          type: string
+        personName:
+          type: string
+        direction:
+          type: string
+          enum: [owed_to_me, i_owe]
+          description: owed_to_me = someone owes me. i_owe = I owe someone
+        amount:
+          type: number
+          description: Original debt amount
+        paidAmount:
+          type: number
+          description: Sum of payments recorded
+        remainingAmount:
+          type: number
+        currency:
+          type: string
+        note:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [open, settled]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - personName
+        - direction
+        - amount
+        - paidAmount
+        - remainingAmount
+        - currency
+        - status
+        - createdAt
+        - updatedAt
+
+    DebtWithPayments:
+      allOf:
+        - $ref: "#/components/schemas/Debt"
+        - type: object
+          properties:
+            payments:
+              type: array
+              items:
+                $ref: "#/components/schemas/Payment"
+          required: [payments]
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+        debtId:
+          type: string
+        amount:
+          type: number
+        note:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, debtId, amount, createdAt]
+
+    CreateDebtInput:
+      type: object
+      properties:
+        personName:
+          type: string
+          minLength: 1
+        direction:
+          type: string
+          enum: [owed_to_me, i_owe]
+        amount:
+          type: number
+          minimum: 0.01
+        note:
+          type: string
+          nullable: true
+      required: [personName, direction, amount]
+
+    UpdateDebtInput:
+      type: object
+      properties:
+        personName:
+          type: string
+          minLength: 1
+        note:
+          type: string
+          nullable: true
+        amount:
+          type: number
+          minimum: 0.01
+
+    CreatePaymentInput:
+      type: object
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+        note:
+          type: string
+          nullable: true
+      required: [amount]
+
+    Summary:
+      type: object
+      properties:
+        currency:
+          type: string
+        totalOwedToMe:
+          type: number
+        totalIOwe:
+          type: number
+        netBalance:
+          type: number
+        openDebtsCount:
+          type: integer
+        settledDebtsCount:
+          type: integer
+        recentDebts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Debt"
+      required:
+        - currency
+        - totalOwedToMe
+        - totalIOwe
+        - netBalance
+        - openDebtsCount
+        - settledDebtsCount
+        - recentDebts
