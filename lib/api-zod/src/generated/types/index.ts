@@ -6,9 +6,12 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./amountShortcut";
+export * from "./amountShortcutKind";
 export * from "./createDebtInput";
 export * from "./createDebtInputDirection";
 export * from "./createPaymentInput";
+export * from "./createPaymentInputKind";
 export * from "./debt";
 export * from "./debtDirection";
 export * from "./debtStatus";
@@ -18,6 +21,7 @@ export * from "./listDebtsDirection";
 export * from "./listDebtsParams";
 export * from "./listDebtsStatus";
 export * from "./payment";
+export * from "./paymentKind";
 export * from "./profile";
 export * from "./profileLanguage";
 export * from "./summary";

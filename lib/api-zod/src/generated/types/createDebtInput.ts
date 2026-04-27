@@ -14,4 +14,5 @@ export interface CreateDebtInput {
   /** @minimum 0.01 */
   amount: number;
   note?: string | null;
+  phone?: string | null;
 }

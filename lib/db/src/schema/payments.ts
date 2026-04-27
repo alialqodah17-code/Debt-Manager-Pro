@@ -14,6 +14,7 @@ export const paymentsTable = pgTable(
     userId: text("user_id").notNull(),
     amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
     note: text("note"),
+    kind: text("kind").notNull().default("add"), // 'add' | 'deduct'
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

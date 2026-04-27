@@ -16,6 +16,7 @@ export const debtsTable = pgTable(
     amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
     currency: text("currency").notNull(),
     note: text("note"),
+    phone: text("phone"),
     status: text("status").notNull().default("open"), // 'open' | 'settled'
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

@@ -5,11 +5,14 @@
  * Diyoun debt tracking API
  * OpenAPI spec version: 0.1.0
  */
+import type { PaymentKind } from "./paymentKind";
 
 export interface Payment {
   id: string;
   debtId: string;
   amount: number;
+  /** add = payment toward the debt; deduct = increases the remaining (e.g. extra borrow / reversal) */
+  kind: PaymentKind;
   note?: string | null;
   createdAt: Date;
 }

@@ -10,6 +10,7 @@ export interface UpdateDebtInput {
   /** @minLength 1 */
   personName?: string;
   note?: string | null;
+  phone?: string | null;
   /** @minimum 0.01 */
   amount?: number;
 }

@@ -73,7 +73,11 @@ export type TranslationKey =
   | "createdAt"
   | "updatedAt"
   | "addPayment"
+  | "deductPayment"
+  | "addToDebt"
+  | "paymentKind"
   | "recordPayment"
+  | "recordDeduction"
   | "paymentAmount"
   | "paymentHistory"
   | "noPayments"
@@ -106,7 +110,31 @@ export type TranslationKey =
   | "addedSuccessfully"
   | "passwordTooShort"
   | "invalidEmail"
-  | "fillAllFields";
+  | "fillAllFields"
+  | "phoneNumber"
+  | "phonePlaceholder"
+  | "phoneOptional"
+  | "call"
+  | "message"
+  | "amountShortcuts"
+  | "shortcutsHint"
+  | "addShortcut"
+  | "newShortcut"
+  | "shortcutLabel"
+  | "shortcutValue"
+  | "shortcutKind"
+  | "fixedAmount"
+  | "fractionAmount"
+  | "fractionHint"
+  | "noShortcuts"
+  | "shareUpdate"
+  | "shareUpdateMessage"
+  | "sendWhatsApp"
+  | "sendSMS"
+  | "skip"
+  | "paymentRecordedMessage"
+  | "deductionRecordedMessage"
+  | "currentBalance";
 
 type Translations = Record<TranslationKey, string>;
 
@@ -144,9 +172,9 @@ const en: Translations = {
   deleteDebtTitle: "Delete this debt?",
   deleteDebtMessage:
     "This will permanently remove the debt and all its payments. This cannot be undone.",
-  deletePaymentTitle: "Delete this payment?",
+  deletePaymentTitle: "Delete this entry?",
   deletePaymentMessage:
-    "This payment will be permanently removed from history.",
+    "This entry will be permanently removed from history.",
   yes: "Yes",
   no: "No",
   home: "Home",
@@ -185,10 +213,14 @@ const en: Translations = {
   createdAt: "Created",
   updatedAt: "Updated",
   addPayment: "Add payment",
-  recordPayment: "Record payment",
-  paymentAmount: "Payment amount",
-  paymentHistory: "Payment history",
-  noPayments: "No payments recorded yet.",
+  deductPayment: "Deduct",
+  addToDebt: "Add to debt",
+  paymentKind: "Type",
+  recordPayment: "Record a payment",
+  recordDeduction: "Add to the debt",
+  paymentAmount: "Amount",
+  paymentHistory: "History",
+  noPayments: "No entries recorded yet.",
   all: "All",
   filterAll: "All",
   filterOpen: "Open",
@@ -220,6 +252,35 @@ const en: Translations = {
   passwordTooShort: "Password must be at least 8 characters",
   invalidEmail: "Please enter a valid email",
   fillAllFields: "Please fill all required fields",
+  phoneNumber: "Phone number",
+  phonePlaceholder: "+1 555 123 4567",
+  phoneOptional: "Phone (optional)",
+  call: "Call",
+  message: "Message",
+  amountShortcuts: "Amount shortcuts",
+  shortcutsHint:
+    "Quick chips that appear in the payment dialog. Use fixed amounts or fractions of the remaining balance.",
+  addShortcut: "Add shortcut",
+  newShortcut: "New shortcut",
+  shortcutLabel: "Label",
+  shortcutValue: "Value",
+  shortcutKind: "Kind",
+  fixedAmount: "Fixed amount",
+  fractionAmount: "Fraction",
+  fractionHint:
+    "Enter a fraction between 0 and 1 (e.g. 0.5 for half of the remaining balance).",
+  noShortcuts: "No shortcuts yet. Add some for one-tap payments.",
+  shareUpdate: "Share an update?",
+  shareUpdateMessage:
+    "Send a quick message about the new balance.",
+  sendWhatsApp: "Send via WhatsApp",
+  sendSMS: "Send SMS",
+  skip: "Skip",
+  paymentRecordedMessage:
+    "Hi {name}, I just recorded a payment of {amount}. Remaining balance: {remaining}.",
+  deductionRecordedMessage:
+    "Hi {name}, I added {amount} to the balance. New balance: {remaining}.",
+  currentBalance: "Current balance",
 };
 
 const ar: Translations = {
@@ -256,8 +317,8 @@ const ar: Translations = {
   deleteDebtTitle: "حذف هذا الدين؟",
   deleteDebtMessage:
     "سيتم حذف الدين وجميع الدفعات المرتبطة به نهائياً. لا يمكن التراجع عن هذا الإجراء.",
-  deletePaymentTitle: "حذف هذه الدفعة؟",
-  deletePaymentMessage: "سيتم حذف هذه الدفعة نهائياً من السجل.",
+  deletePaymentTitle: "حذف هذه الحركة؟",
+  deletePaymentMessage: "سيتم حذف هذه الحركة نهائياً من السجل.",
   yes: "نعم",
   no: "لا",
   home: "الرئيسية",
@@ -296,10 +357,14 @@ const ar: Translations = {
   createdAt: "تاريخ الإضافة",
   updatedAt: "آخر تحديث",
   addPayment: "إضافة دفعة",
+  deductPayment: "خصم",
+  addToDebt: "إضافة على الدين",
+  paymentKind: "النوع",
   recordPayment: "تسجيل دفعة",
-  paymentAmount: "مبلغ الدفعة",
-  paymentHistory: "سجل الدفعات",
-  noPayments: "لم يتم تسجيل أي دفعات بعد.",
+  recordDeduction: "إضافة على الرصيد",
+  paymentAmount: "المبلغ",
+  paymentHistory: "السجل",
+  noPayments: "لم يتم تسجيل أي حركات بعد.",
   all: "الكل",
   filterAll: "الكل",
   filterOpen: "مفتوحة",
@@ -331,6 +396,33 @@ const ar: Translations = {
   passwordTooShort: "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
   invalidEmail: "يرجى إدخال بريد إلكتروني صحيح",
   fillAllFields: "يرجى تعبئة جميع الحقول المطلوبة",
+  phoneNumber: "رقم الهاتف",
+  phonePlaceholder: "+966 5X XXX XXXX",
+  phoneOptional: "الهاتف (اختياري)",
+  call: "اتصال",
+  message: "رسالة",
+  amountShortcuts: "اختصارات المبالغ",
+  shortcutsHint:
+    "أزرار سريعة تظهر في نافذة الدفع. استخدم مبالغ ثابتة أو نسبة من الرصيد المتبقي.",
+  addShortcut: "إضافة اختصار",
+  newShortcut: "اختصار جديد",
+  shortcutLabel: "الاسم",
+  shortcutValue: "القيمة",
+  shortcutKind: "النوع",
+  fixedAmount: "مبلغ ثابت",
+  fractionAmount: "نسبة",
+  fractionHint: "أدخل قيمة بين 0 و 1 (مثلاً 0.5 لنصف الرصيد المتبقي).",
+  noShortcuts: "لا توجد اختصارات. أضف بعضها لتسجيل الدفعات بضغطة واحدة.",
+  shareUpdate: "إرسال تحديث؟",
+  shareUpdateMessage: "أرسل رسالة سريعة بالرصيد الجديد.",
+  sendWhatsApp: "إرسال عبر واتساب",
+  sendSMS: "إرسال رسالة SMS",
+  skip: "تخطي",
+  paymentRecordedMessage:
+    "السلام عليكم {name}، تم تسجيل دفعة بمبلغ {amount}. الرصيد المتبقي: {remaining}.",
+  deductionRecordedMessage:
+    "السلام عليكم {name}، تمت إضافة {amount} على الرصيد. الرصيد الجديد: {remaining}.",
+  currentBalance: "الرصيد الحالي",
 };
 
 export const translations: Record<Language, Translations> = { en, ar };

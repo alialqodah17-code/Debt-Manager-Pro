@@ -5,6 +5,7 @@
  * Diyoun debt tracking API
  * OpenAPI spec version: 0.1.0
  */
+import type { AmountShortcut } from "./amountShortcut";
 import type { ProfileLanguage } from "./profileLanguage";
 
 export interface Profile {
@@ -12,5 +13,6 @@ export interface Profile {
   /** ISO currency code, e.g. USD, SAR, EUR */
   currency: string;
   language: ProfileLanguage;
+  amountShortcuts: AmountShortcut[];
   createdAt: Date;
 }

@@ -243,10 +243,14 @@ components:
         language:
           type: string
           enum: [en, ar]
+        amountShortcuts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AmountShortcut"
         createdAt:
           type: string
           format: date-time
-      required: [userId, currency, language, createdAt]
+      required: [userId, currency, language, amountShortcuts, createdAt]
 
     UpdateProfileInput:
       type: object
@@ -256,6 +260,24 @@ components:
         language:
           type: string
           enum: [en, ar]
+        amountShortcuts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AmountShortcut"
+
+    AmountShortcut:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        value:
+          type: number
+        kind:
+          type: string
+          enum: [fixed, fraction]
+      required: [id, label, value, kind]
 
     Debt:
       type: object
@@ -279,6 +301,9 @@ components:
         currency:
           type: string
         note:
+          type: string
+          nullable: true
+        phone:
           type: string
           nullable: true
         status:
@@ -322,13 +347,17 @@ components:
           type: string
         amount:
           type: number
+        kind:
+          type: string
+          enum: [add, deduct]
+          description: "add = payment toward the debt; deduct = increases the remaining (e.g. extra borrow / reversal)"
         note:
           type: string
           nullable: true
         createdAt:
           type: string
           format: date-time
-      required: [id, debtId, amount, createdAt]
+      required: [id, debtId, amount, kind, createdAt]
 
     CreateDebtInput:
       type: object
@@ -345,6 +374,9 @@ components:
         note:
           type: string
           nullable: true
+        phone:
+          type: string
+          nullable: true
       required: [personName, direction, amount]
 
     UpdateDebtInput:
@@ -354,6 +386,9 @@ components:
           type: string
           minLength: 1
         note:
+          type: string
+          nullable: true
+        phone:
           type: string
           nullable: true
         amount:
@@ -366,6 +401,10 @@ components:
         amount:
           type: number
           minimum: 0.01
+        kind:
+          type: string
+          enum: [add, deduct]
+          default: add
         note:
           type: string
           nullable: true

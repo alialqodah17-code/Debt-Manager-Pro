@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 import { Button } from "@/components/Button";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Screen } from "@/components/Screen";
 import { TextField } from "@/components/TextField";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -20,8 +21,10 @@ import { CURRENCIES, getCurrency } from "@/lib/currencies";
 import {
   getGetMyProfileQueryKey,
   getGetSummaryQueryKey,
+  useGetMyProfile,
   useUpdateMyProfile,
 } from "@workspace/api-client-react";
+import type { AmountShortcut } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function Settings() {
@@ -36,6 +39,22 @@ export default function Settings() {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [search, setSearch] = useState("");
 
+  const profileQ = useGetMyProfile();
+  const shortcuts: AmountShortcut[] = profileQ.data?.amountShortcuts ?? [];
+
+  const [shortcutModal, setShortcutModal] = useState<
+    | null
+    | { mode: "create" }
+    | { mode: "edit"; original: AmountShortcut }
+  >(null);
+  const [scLabel, setScLabel] = useState("");
+  const [scValue, setScValue] = useState("");
+  const [scKind, setScKind] = useState<"fixed" | "fraction">("fraction");
+  const [scError, setScError] = useState<string | null>(null);
+  const [confirmDeleteShortcut, setConfirmDeleteShortcut] = useState<
+    string | null
+  >(null);
+
   const update = useUpdateMyProfile({
     mutation: {
       onSuccess: () => {
@@ -44,6 +63,64 @@ export default function Settings() {
       },
     },
   });
+
+  const persistShortcuts = (next: AmountShortcut[]) => {
+    update.mutate({ data: { amountShortcuts: next } });
+  };
+
+  const openCreateShortcut = () => {
+    setScLabel("");
+    setScValue("");
+    setScKind("fraction");
+    setScError(null);
+    setShortcutModal({ mode: "create" });
+  };
+
+  const openEditShortcut = (sc: AmountShortcut) => {
+    setScLabel(sc.label);
+    setScValue(String(sc.value));
+    setScKind(sc.kind);
+    setScError(null);
+    setShortcutModal({ mode: "edit", original: sc });
+  };
+
+  const saveShortcut = () => {
+    setScError(null);
+    const label = scLabel.trim();
+    const value = parseFloat(scValue.replace(",", "."));
+    if (!label || !(value > 0)) {
+      setScError(t("fillAllFields"));
+      return;
+    }
+    if (scKind === "fraction" && value > 1) {
+      setScError(t("fractionHint"));
+      return;
+    }
+    if (!shortcutModal) return;
+    if (shortcutModal.mode === "create") {
+      const newSc: AmountShortcut = {
+        id: `sc_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+        label,
+        value,
+        kind: scKind,
+      };
+      persistShortcuts([...shortcuts, newSc]);
+    } else {
+      persistShortcuts(
+        shortcuts.map((s) =>
+          s.id === shortcutModal.original.id
+            ? { ...s, label, value, kind: scKind }
+            : s,
+        ),
+      );
+    }
+    setShortcutModal(null);
+  };
+
+  const deleteShortcut = (id: string) => {
+    persistShortcuts(shortcuts.filter((s) => s.id !== id));
+    setConfirmDeleteShortcut(null);
+  };
 
   const userEmail =
     user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses?.[0]?.emailAddress ?? "";
@@ -227,6 +304,137 @@ export default function Settings() {
           </View>
         </View>
 
+        <SectionLabel title={t("amountShortcuts")} />
+        <View
+          style={[
+            styles.shortcutsCard,
+            {
+              backgroundColor: c.card,
+              borderColor: c.border,
+              borderRadius: c.radius - 4,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.shortcutsHint,
+              {
+                color: c.mutedForeground,
+                textAlign: isRTL ? "right" : "left",
+              },
+            ]}
+          >
+            {t("shortcutsHint")}
+          </Text>
+
+          {shortcuts.length === 0 ? (
+            <Text
+              style={[
+                styles.shortcutsEmpty,
+                {
+                  color: c.mutedForeground,
+                  textAlign: isRTL ? "right" : "left",
+                },
+              ]}
+            >
+              {t("noShortcuts")}
+            </Text>
+          ) : (
+            <View style={{ gap: 8, marginTop: 12 }}>
+              {shortcuts.map((sc) => (
+                <View
+                  key={sc.id}
+                  style={[
+                    styles.shortcutRow,
+                    {
+                      backgroundColor: c.muted,
+                      borderRadius: c.radius - 6,
+                      flexDirection: isRTL ? "row-reverse" : "row",
+                    },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.shortcutBadge,
+                      {
+                        backgroundColor: c.card,
+                        borderRadius: 999,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={{
+                        color: c.foreground,
+                        fontFamily: "Inter_700Bold",
+                        fontSize: 13,
+                      }}
+                    >
+                      {sc.label}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1, marginInlineStart: 12 }}>
+                    <Text
+                      style={[
+                        styles.shortcutTitle,
+                        {
+                          color: c.foreground,
+                          textAlign: isRTL ? "right" : "left",
+                        },
+                      ]}
+                    >
+                      {sc.kind === "fraction"
+                        ? `${t("fractionAmount")} · ${(sc.value * 100).toFixed(0)}%`
+                        : `${t("fixedAmount")} · ${sc.value}`}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={() => openEditShortcut(sc)}
+                    style={({ pressed }) => ({
+                      padding: 8,
+                      opacity: pressed ? 0.6 : 1,
+                    })}
+                  >
+                    <Feather name="edit-2" size={14} color={c.foreground} />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => setConfirmDeleteShortcut(sc.id)}
+                    style={({ pressed }) => ({
+                      padding: 8,
+                      opacity: pressed ? 0.6 : 1,
+                    })}
+                  >
+                    <Feather name="trash-2" size={14} color={c.destructive} />
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          )}
+
+          <Pressable
+            onPress={openCreateShortcut}
+            style={({ pressed }) => [
+              styles.addShortcutBtn,
+              {
+                borderColor: c.primary,
+                opacity: pressed ? 0.7 : 1,
+                flexDirection: isRTL ? "row-reverse" : "row",
+              },
+            ]}
+          >
+            <Feather name="plus" size={16} color={c.primary} />
+            <Text
+              style={{
+                color: c.primary,
+                fontFamily: "Inter_600SemiBold",
+                fontSize: 14,
+                marginInlineStart: 8,
+              }}
+            >
+              {t("addShortcut")}
+            </Text>
+          </Pressable>
+        </View>
+
         <SectionLabel title={t("account")} />
 
         <Pressable
@@ -381,7 +589,142 @@ export default function Settings() {
           </ScrollView>
         </View>
       </Modal>
+
+      <Modal
+        visible={!!shortcutModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShortcutModal(null)}
+      >
+        <Pressable
+          style={[styles.shortcutOverlay, { backgroundColor: c.overlay }]}
+          onPress={() => setShortcutModal(null)}
+        >
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            style={[
+              styles.shortcutSheet,
+              {
+                backgroundColor: c.background,
+                borderTopLeftRadius: c.radius,
+                borderTopRightRadius: c.radius,
+              },
+            ]}
+          >
+            <View style={[styles.sheetHandle, { backgroundColor: c.border }]} />
+            <Text
+              style={[
+                styles.sheetTitle,
+                { color: c.foreground, textAlign: isRTL ? "right" : "left" },
+              ]}
+            >
+              {t("newShortcut")}
+            </Text>
+
+            <View
+              style={[
+                styles.kindToggle,
+                { backgroundColor: c.muted, borderRadius: c.radius - 6 },
+              ]}
+            >
+              <KindChip
+                label={t("fractionAmount")}
+                active={scKind === "fraction"}
+                onPress={() => setScKind("fraction")}
+              />
+              <KindChip
+                label={t("fixedAmount")}
+                active={scKind === "fixed"}
+                onPress={() => setScKind("fixed")}
+              />
+            </View>
+
+            <TextField
+              label={t("shortcutLabel")}
+              value={scLabel}
+              onChangeText={setScLabel}
+              placeholder="½"
+            />
+
+            <TextField
+              label={t("shortcutValue")}
+              value={scValue}
+              onChangeText={setScValue}
+              placeholder={scKind === "fraction" ? "0.5" : "100"}
+              keyboardType="decimal-pad"
+            />
+
+            <Text
+              style={{
+                color: c.mutedForeground,
+                fontSize: 12,
+                fontFamily: "Inter_500Medium",
+                textAlign: isRTL ? "right" : "left",
+              }}
+            >
+              {scKind === "fraction" ? t("fractionHint") : ""}
+            </Text>
+
+            {scError ? (
+              <Text style={{ color: c.destructive }}>{scError}</Text>
+            ) : null}
+
+            <Button
+              title={t("save")}
+              onPress={saveShortcut}
+              loading={update.isPending}
+            />
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <ConfirmDialog
+        visible={!!confirmDeleteShortcut}
+        title={t("deletePermanently")}
+        message=""
+        confirmLabel={t("deletePermanently")}
+        cancelLabel={t("cancel")}
+        destructive
+        onConfirm={() => {
+          if (confirmDeleteShortcut) deleteShortcut(confirmDeleteShortcut);
+        }}
+        onCancel={() => setConfirmDeleteShortcut(null)}
+      />
     </Screen>
+  );
+}
+
+function KindChip({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  const c = useColors();
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.kindBtn,
+        {
+          backgroundColor: active ? c.card : "transparent",
+          opacity: pressed ? 0.85 : 1,
+        },
+      ]}
+    >
+      <Text
+        style={{
+          color: active ? c.foreground : c.mutedForeground,
+          fontFamily: "Inter_600SemiBold",
+          fontSize: 13,
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -552,5 +895,79 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Inter_500Medium",
     marginTop: 2,
+  },
+  shortcutsCard: {
+    padding: 14,
+    borderWidth: 1,
+  },
+  shortcutsHint: {
+    fontSize: 12,
+    fontFamily: "Inter_500Medium",
+    lineHeight: 18,
+  },
+  shortcutsEmpty: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+    marginTop: 12,
+  },
+  shortcutRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  shortcutBadge: {
+    minWidth: 44,
+    height: 32,
+    paddingHorizontal: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  shortcutTitle: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+  },
+  addShortcutBtn: {
+    marginTop: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderStyle: "dashed",
+  },
+  shortcutOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  shortcutSheet: {
+    padding: 20,
+    gap: 14,
+    paddingBottom: 32,
+  },
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 999,
+    alignSelf: "center",
+    marginBottom: 4,
+  },
+  sheetTitle: {
+    fontSize: 18,
+    fontFamily: "Inter_700Bold",
+  },
+  kindToggle: {
+    flexDirection: "row",
+    padding: 4,
+    gap: 4,
+  },
+  kindBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 12,
   },
 });

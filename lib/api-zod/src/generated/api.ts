@@ -21,6 +21,14 @@ export const GetMyProfileResponse = zod.object({
   userId: zod.string(),
   currency: zod.string().describe("ISO currency code, e.g. USD, SAR, EUR"),
   language: zod.enum(["en", "ar"]),
+  amountShortcuts: zod.array(
+    zod.object({
+      id: zod.string(),
+      label: zod.string(),
+      value: zod.number(),
+      kind: zod.enum(["fixed", "fraction"]),
+    }),
+  ),
   createdAt: zod.coerce.date(),
 });
 
@@ -30,12 +38,30 @@ export const GetMyProfileResponse = zod.object({
 export const UpdateMyProfileBody = zod.object({
   currency: zod.string().optional(),
   language: zod.enum(["en", "ar"]).optional(),
+  amountShortcuts: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        label: zod.string(),
+        value: zod.number(),
+        kind: zod.enum(["fixed", "fraction"]),
+      }),
+    )
+    .optional(),
 });
 
 export const UpdateMyProfileResponse = zod.object({
   userId: zod.string(),
   currency: zod.string().describe("ISO currency code, e.g. USD, SAR, EUR"),
   language: zod.enum(["en", "ar"]),
+  amountShortcuts: zod.array(
+    zod.object({
+      id: zod.string(),
+      label: zod.string(),
+      value: zod.number(),
+      kind: zod.enum(["fixed", "fraction"]),
+    }),
+  ),
   createdAt: zod.coerce.date(),
 });
 
@@ -61,6 +87,7 @@ export const GetSummaryResponse = zod.object({
       remainingAmount: zod.number(),
       currency: zod.string(),
       note: zod.string().nullish(),
+      phone: zod.string().nullish(),
       status: zod.enum(["open", "settled"]),
       createdAt: zod.coerce.date(),
       updatedAt: zod.coerce.date(),
@@ -87,6 +114,7 @@ export const ListDebtsResponseItem = zod.object({
   remainingAmount: zod.number(),
   currency: zod.string(),
   note: zod.string().nullish(),
+  phone: zod.string().nullish(),
   status: zod.enum(["open", "settled"]),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -104,6 +132,7 @@ export const CreateDebtBody = zod.object({
   direction: zod.enum(["owed_to_me", "i_owe"]),
   amount: zod.number().min(createDebtBodyAmountMin),
   note: zod.string().nullish(),
+  phone: zod.string().nullish(),
 });
 
 /**
@@ -125,6 +154,7 @@ export const GetDebtResponse = zod
     remainingAmount: zod.number(),
     currency: zod.string(),
     note: zod.string().nullish(),
+    phone: zod.string().nullish(),
     status: zod.enum(["open", "settled"]),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),
@@ -136,6 +166,11 @@ export const GetDebtResponse = zod
           id: zod.string(),
           debtId: zod.string(),
           amount: zod.number(),
+          kind: zod
+            .enum(["add", "deduct"])
+            .describe(
+              "add = payment toward the debt; deduct = increases the remaining (e.g. extra borrow \/ reversal)",
+            ),
           note: zod.string().nullish(),
           createdAt: zod.coerce.date(),
         }),
@@ -155,6 +190,7 @@ export const updateDebtBodyAmountMin = 0.01;
 export const UpdateDebtBody = zod.object({
   personName: zod.string().min(1).optional(),
   note: zod.string().nullish(),
+  phone: zod.string().nullish(),
   amount: zod.number().min(updateDebtBodyAmountMin).optional(),
 });
 
@@ -169,6 +205,7 @@ export const UpdateDebtResponse = zod.object({
   remainingAmount: zod.number(),
   currency: zod.string(),
   note: zod.string().nullish(),
+  phone: zod.string().nullish(),
   status: zod.enum(["open", "settled"]),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -190,8 +227,11 @@ export const AddPaymentParams = zod.object({
 
 export const addPaymentBodyAmountMin = 0.01;
 
+export const addPaymentBodyKindDefault = `add`;
+
 export const AddPaymentBody = zod.object({
   amount: zod.number().min(addPaymentBodyAmountMin),
+  kind: zod.enum(["add", "deduct"]).default(addPaymentBodyKindDefault),
   note: zod.string().nullish(),
 });
 

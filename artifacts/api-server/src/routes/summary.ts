@@ -19,7 +19,7 @@ router.get("/summary", requireAuth, async (req, res) => {
   const paidRows = await db
     .select({
       debtId: paymentsTable.debtId,
-      total: sql<string>`COALESCE(SUM(${paymentsTable.amount}), 0)`,
+      total: sql<string>`COALESCE(SUM(CASE WHEN ${paymentsTable.kind} = 'deduct' THEN -${paymentsTable.amount} ELSE ${paymentsTable.amount} END), 0)`,
     })
     .from(paymentsTable)
     .where(eq(paymentsTable.userId, userId))
@@ -50,10 +50,11 @@ router.get("/summary", requireAuth, async (req, res) => {
       personName: d.personName,
       direction: d.direction,
       amount,
-      paidAmount: paid,
+      paidAmount: Math.max(0, paid),
       remainingAmount: Math.max(0, amount - paid),
       currency: d.currency,
       note: d.note,
+      phone: d.phone,
       status: d.status,
       createdAt: d.createdAt.toISOString(),
       updatedAt: d.updatedAt.toISOString(),

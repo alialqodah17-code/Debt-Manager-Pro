@@ -5,9 +5,11 @@
  * Diyoun debt tracking API
  * OpenAPI spec version: 0.1.0
  */
+import type { CreatePaymentInputKind } from "./createPaymentInputKind";
 
 export interface CreatePaymentInput {
   /** @minimum 0.01 */
   amount: number;
+  kind?: CreatePaymentInputKind;
   note?: string | null;
 }

@@ -28,6 +28,9 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 
 - **api-server** — Express + Drizzle backend at `/api`. Routes: `profile`, `debts`, `summary`, `payments`. Uses Replit-managed Clerk (`clerkMiddleware` + proxy at `/api/__clerk`). All routes behind `requireAuth`.
 - **debts** (Diyoun) — Expo app at `/`. Bilingual EN/AR debt tracker with luxurious emerald + gold theme (Playfair Display serif for hero numbers, Inter for UI, deep-midnight gradient cards with gold accents). Auth via Replit-managed Clerk (Google SSO + email/password using `@clerk/expo` for `useSSO`/`useAuth` and `@clerk/expo/legacy` for `useSignIn`/`useSignUp`). Settings (currency, language, theme) persisted via AsyncStorage; profile + debts + payments synced to PostgreSQL via `/api`. Permanent delete for debts and payments. Each debt and payment carries a date.
+  - Payments support two kinds: `add` (toward the debt) and `deduct` (increases the remaining balance). Server-side sums use `SUM(CASE kind WHEN 'deduct' THEN -amount ELSE amount END)` so totals and `settled` status stay correct.
+  - Each debt has an optional `phone` field. The detail page exposes one-tap call and WhatsApp buttons, and after recording any payment the user is prompted to send a pre-filled WhatsApp / SMS update if a phone is on file.
+  - Each profile stores `amountShortcuts` (jsonb): an array of `{id,label,value,kind: 'fixed'|'fraction'}`. Fractions are applied against `remainingAmount` (for add) or `amount` (for deduct). New profiles seed with ½ / ⅓ / ¼ / All. Managed in Settings → Amount shortcuts.
 - **mockup-sandbox** — Vite preview server for canvas component prototyping.
 
 ## Notes

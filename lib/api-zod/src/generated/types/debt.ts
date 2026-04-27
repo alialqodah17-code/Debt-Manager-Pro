@@ -20,6 +20,7 @@ export interface Debt {
   remainingAmount: number;
   currency: string;
   note?: string | null;
+  phone?: string | null;
   status: DebtStatus;
   createdAt: Date;
   updatedAt: Date;

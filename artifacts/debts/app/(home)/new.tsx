@@ -34,6 +34,7 @@ export default function NewDebt() {
     "owed_to_me",
   );
   const [personName, setPersonName] = useState("");
+  const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +65,7 @@ export default function NewDebt() {
         direction,
         amount: amt,
         note: note.trim() ? note.trim() : null,
+        phone: phone.trim() ? phone.trim() : null,
       },
     });
   };
@@ -127,6 +129,15 @@ export default function NewDebt() {
           onChangeText={setPersonName}
           placeholder={t("personNamePlaceholder")}
           autoCapitalize="words"
+        />
+
+        <TextField
+          label={t("phoneOptional")}
+          value={phone}
+          onChangeText={setPhone}
+          placeholder={t("phonePlaceholder")}
+          keyboardType="phone-pad"
+          autoCapitalize="none"
         />
 
         <TextField

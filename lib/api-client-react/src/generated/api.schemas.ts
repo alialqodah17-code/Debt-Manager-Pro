@@ -17,11 +17,27 @@ export const ProfileLanguage = {
   ar: "ar",
 } as const;
 
+export type AmountShortcutKind =
+  (typeof AmountShortcutKind)[keyof typeof AmountShortcutKind];
+
+export const AmountShortcutKind = {
+  fixed: "fixed",
+  fraction: "fraction",
+} as const;
+
+export interface AmountShortcut {
+  id: string;
+  label: string;
+  value: number;
+  kind: AmountShortcutKind;
+}
+
 export interface Profile {
   userId: string;
   /** ISO currency code, e.g. USD, SAR, EUR */
   currency: string;
   language: ProfileLanguage;
+  amountShortcuts: AmountShortcut[];
   createdAt: string;
 }
 
@@ -36,6 +52,7 @@ export const UpdateProfileInputLanguage = {
 export interface UpdateProfileInput {
   currency?: string;
   language?: UpdateProfileInputLanguage;
+  amountShortcuts?: AmountShortcut[];
 }
 
 /**
@@ -67,15 +84,28 @@ export interface Debt {
   remainingAmount: number;
   currency: string;
   note?: string | null;
+  phone?: string | null;
   status: DebtStatus;
   createdAt: string;
   updatedAt: string;
 }
 
+/**
+ * add = payment toward the debt; deduct = increases the remaining (e.g. extra borrow / reversal)
+ */
+export type PaymentKind = (typeof PaymentKind)[keyof typeof PaymentKind];
+
+export const PaymentKind = {
+  add: "add",
+  deduct: "deduct",
+} as const;
+
 export interface Payment {
   id: string;
   debtId: string;
   amount: number;
+  /** add = payment toward the debt; deduct = increases the remaining (e.g. extra borrow / reversal) */
+  kind: PaymentKind;
   note?: string | null;
   createdAt: string;
 }
@@ -99,19 +129,30 @@ export interface CreateDebtInput {
   /** @minimum 0.01 */
   amount: number;
   note?: string | null;
+  phone?: string | null;
 }
 
 export interface UpdateDebtInput {
   /** @minLength 1 */
   personName?: string;
   note?: string | null;
+  phone?: string | null;
   /** @minimum 0.01 */
   amount?: number;
 }
 
+export type CreatePaymentInputKind =
+  (typeof CreatePaymentInputKind)[keyof typeof CreatePaymentInputKind];
+
+export const CreatePaymentInputKind = {
+  add: "add",
+  deduct: "deduct",
+} as const;
+
 export interface CreatePaymentInput {
   /** @minimum 0.01 */
   amount: number;
+  kind?: CreatePaymentInputKind;
   note?: string | null;
 }
 

@@ -5,9 +5,11 @@
  * Diyoun debt tracking API
  * OpenAPI spec version: 0.1.0
  */
+import type { AmountShortcut } from "./amountShortcut";
 import type { UpdateProfileInputLanguage } from "./updateProfileInputLanguage";
 
 export interface UpdateProfileInput {
   currency?: string;
   language?: UpdateProfileInputLanguage;
+  amountShortcuts?: AmountShortcut[];
 }
