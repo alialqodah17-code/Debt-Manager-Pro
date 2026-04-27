@@ -21,8 +21,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build Web
-        # السطر السحري لتجاهل أخطاء الـ Typescript اللي وقفت البناء
-        run: CI=false pnpm run build
+        run: pnpm run build -- --no-typecheck
 
       - name: Capacitor Setup
         run: |
