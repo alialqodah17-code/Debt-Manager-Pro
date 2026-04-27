@@ -62,6 +62,7 @@
     "zod-validation-error": "^3.4.0"
   },
   "dependencies": {
-    "@expo-google-fonts/playfair-display": "^0.4.2"
+    "@expo-google-fonts/playfair-display": "^0.4.2",
+    "expo-build-properties": "^55.0.13"
   }
 }
