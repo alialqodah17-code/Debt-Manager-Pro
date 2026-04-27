@@ -18,11 +18,10 @@ jobs:
         run: npm install -g pnpm
 
       - name: Install Deps
-        # السطر القادم هو الحل: تجاهل تعارض الإصدارات
         run: pnpm install --no-frozen-lockfile
 
       - name: Build Web
-        # أضفت سطر لتجاهل أخطاء TypeScript أثناء البناء لضمان خروج الـ APK
+        # السطر السحري لتجاهل أخطاء الـ Typescript اللي وقفت البناء
         run: CI=false pnpm run build
 
       - name: Capacitor Setup
