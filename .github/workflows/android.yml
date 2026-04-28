@@ -25,6 +25,8 @@ jobs:
         run: pnpm --filter @workspace/mockup-sandbox run build
         env:
           EXPO_PUBLIC_DOMAIN: localhost
+          PORT: 4173
+          BASE_PATH: /
 
       - name: Capacitor Setup
         run: |
