@@ -12,20 +12,25 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22.12.0
+          cache: pnpm
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install Deps
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build Web
-        run: pnpm run build
+        run: pnpm --filter @workspace/mockup-sandbox run build
+        env:
+          EXPO_PUBLIC_DOMAIN: localhost
 
       - name: Capacitor Setup
         run: |
-          pnpm add @capacitor/core @capacitor/cli @capacitor/android
+          pnpm --filter @workspace/mockup-sandbox add @capacitor/core @capacitor/cli @capacitor/android
+          cd artifacts/mockup-sandbox
           npx cap init Diyoun com.ali.diyoun --web-dir dist
           npx cap add android
 
@@ -36,7 +41,7 @@ jobs:
 
       - name: Build APK
         run: |
-          cd android
+          cd artifacts/mockup-sandbox/android
           chmod +x gradlew
           ./gradlew assembleDebug
 
@@ -44,4 +49,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Diyoun-App
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: artifacts/mockup-sandbox/android/app/build/outputs/apk/debug/app-debug.apk
