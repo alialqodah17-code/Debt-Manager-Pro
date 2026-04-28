@@ -67,10 +67,13 @@ function getDeploymentDomain() {
     return stripProtocol(process.env.EXPO_PUBLIC_DOMAIN);
   }
 
-  console.error(
-    "ERROR: No deployment domain found. Set REPLIT_INTERNAL_APP_DOMAIN, REPLIT_DEV_DOMAIN, or EXPO_PUBLIC_DOMAIN",
+  // CI and local builds outside Replit may not provide a deployment domain.
+  // Default to localhost so static assets can still be generated.
+  console.warn(
+    "WARN: No deployment domain found. Falling back to localhost. " +
+      "Set REPLIT_INTERNAL_APP_DOMAIN, REPLIT_DEV_DOMAIN, or EXPO_PUBLIC_DOMAIN for production deployments.",
   );
-  process.exit(1);
+  return "localhost";
 }
 
 function prepareDirectories(timestamp) {
