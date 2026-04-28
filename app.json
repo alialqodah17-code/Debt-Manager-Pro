@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Debt-Manager-Pro",
+    "slug": "debt-manager-pro",
+    "version": "1.0.0",
+    "platforms": ["android"],
+    "experiments": {
+      "newArchEnabled": true
+    },
+    "android": {
+      "package": "com.alialqodah17.debtmanagerpro"
+    }
+  }
+}
